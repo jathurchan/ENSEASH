@@ -6,7 +6,9 @@
 
 #define BUFF_SIZE 128
 
-int main (int argc, char *argv) {
+void getcode(char *charcode, char *statuschar, char *prompt, int statuscode, char *end);
+
+int main (int argc, char **argv) {
 
 	char message[200] = "Welcome to ENSEA Tiny Shell.\nTo quit, tap 'exit'.\n";
 	ssize_t ret;
@@ -16,11 +18,12 @@ int main (int argc, char *argv) {
 	char beg[BUFF_SIZE] = "enseash % ";
 	char bye[BUFF_SIZE] = "Bye bye...\n";
 	char prompt[BUFF_SIZE] = "";
-	char strexit[BUFF_SIZE] = "[exit:0";
+	char strexit[BUFF_SIZE] = "[exit:";
 	char sign[BUFF_SIZE] = "[sign:";
 	char end[BUFF_SIZE] = "] % ";
 	int status;
-	char strstatus[BUFF_SIZE];
+	char statussign[BUFF_SIZE];
+	char statusexit[BUFF_SIZE];
 
 	write(STDOUT_FILENO, message, strlen(message));
 	write(STDOUT_FILENO, beg, strlen(beg));
@@ -37,20 +40,18 @@ int main (int argc, char *argv) {
 			if ((pid=fork())==-1) {
 				write (STDOUT_FILENO, "exit", strlen("exit"));
 				exit(EXIT_FAILURE);
+
 			} else if (pid == 0) {		
 				execlp(command, command, NULL);
+				
 			} else {
 				waitpid(pid, &status, WCONTINUED);
 				strcat(prompt,"enseash ");
 				
-				if (status==0) {
-					strcat(prompt,strexit);
-					strcat(prompt, end); 
-				} else {
-					strcat(prompt,sign);
-					sprintf(strstatus, "%d", status);
-					strcat(prompt, strstatus);
-					strcat(prompt, end); 
+				if (WIFEXITED(status)) {
+					getcode (strexit, statusexit, prompt, WEXITSTATUS(status), end);
+				} else if (WIFEXITED(status)) {
+					getcode (sign, statussign, prompt, WTERMSIG(status), end);
 				}
 				
 				write(STDOUT_FILENO, prompt, strlen(prompt));
@@ -62,3 +63,11 @@ int main (int argc, char *argv) {
 	return 0;
 
 }
+
+void getcode(char *charcode, char *statuschar, char *prompt, int statuscode, char *end) {
+	strcat(prompt, charcode);
+	sprintf(statuschar, "%d", statuscode);
+	strcat(prompt, statuschar);
+	strcat(prompt, end); 
+}
+
