@@ -14,6 +14,5 @@ int main (int argc, char *argv[]) {
 	write(STDOUT_FILENO, message, strlen(message));
 	write(STDOUT_FILENO, beg, strlen(beg));
 	
-	
 	return 0;
 }
