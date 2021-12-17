@@ -7,7 +7,9 @@
 
 #define BUFF_SIZE 128
 
-int main (int argc, char *argv) {
+int getTime(char* time);
+
+int main (int argc, char **argv) {
 
 	char message[200] = "Welcome to ENSEA Tiny Shell.\nTo quit, tap 'exit'.\n";
 	ssize_t ret;
@@ -22,6 +24,7 @@ int main (int argc, char *argv) {
 	char end[BUFF_SIZE] = "] % ";
 	int status;
 	char strstatus[BUFF_SIZE];
+	char time[BUFF_SIZE];
 
 	write(STDOUT_FILENO, message, strlen(message));
 	write(STDOUT_FILENO, beg, strlen(beg));
@@ -43,12 +46,14 @@ int main (int argc, char *argv) {
 			} else {
 				waitpid(pid, &status, WCONTINUED);
 				strcat(prompt,"enseash ");
+				getTime(time);
+				printf("%s\n", time);
 				
 				if (status==0) {
 					strcat(prompt,strexit);
 					strcat(prompt, end); 
 				} else {
-					strcat(prompt,sign);
+					strcat(prompt, sign);
 					sprintf(strstatus, "%d", status);
 					strcat(prompt, strstatus);
 					strcat(prompt, end); 
@@ -61,5 +66,14 @@ int main (int argc, char *argv) {
 	}
 	
 	return 0;
+
+}
+
+int getTime(char* time) {
+	time_t milli;
+	struct timespec curTime;
+	
+	clock_gettime(CLOCK_REALTIME, *curTime);
+	(int)milli = NANO_TO_MILLI(curTime.tv_usec);
 
 }

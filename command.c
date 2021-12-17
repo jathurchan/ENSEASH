@@ -6,7 +6,7 @@
 
 #define BUFF_SIZE 128
 
-int main (int argc, char *argv) {
+int main (int argc, char **argv) {
 
 	char message[200] = "Welcome to ENSEA Tiny Shell.\nTo quit, tap 'exit'.\n";
 	ssize_t ret;
