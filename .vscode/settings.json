@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "commandlistener.h": "c"
+        "commandlistener.h": "c",
+        "stdlib.h": "c"
     }
 }
