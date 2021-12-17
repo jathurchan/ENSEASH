@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include<sys/wait.h>	
 #include <unistd.h>
+#include <time.h>
 
 #define BUFF_SIZE 128
 
