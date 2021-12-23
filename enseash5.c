@@ -25,7 +25,7 @@
 #define S_END "] % "
 
 void execute(char *command);
-void display_prompt(char *charcode, int statuscode, double execc);
+void display_prompt(char *charcode, int statuscode, double exec_time);
 void display_return(pid_t pid);
 double get_time(struct timespec *start, struct timespec *end);
 
@@ -83,7 +83,7 @@ void execute(char *command) {
 	}
 }
 
-void display_prompt(char *charcode, int statuscode, double execc) {
+void display_prompt(char *charcode, int statuscode, double exec_time) {
 	
 	char prompt[BUFF_SIZE] = "";
 	
@@ -98,7 +98,7 @@ void display_prompt(char *charcode, int statuscode, double execc) {
 	
 	char exec[BUFF_SIZE];
 	
-	sprintf(exec, "%.fms", execc); 
+	sprintf(exec, "%.fms", exec_time); 
 	strcat(prompt, exec);
 	strcat(prompt, S_END); 
 

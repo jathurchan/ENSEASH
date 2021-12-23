@@ -1,4 +1,3 @@
-
 // Added: Display the return code (or signal) of the previous code
 // Improved: Organization with several functions
 
@@ -8,56 +7,48 @@
 #include<sys/wait.h>	
 #include <unistd.h>
 
+//Welcome message
 #define BUFF_SIZE 128
+#define MESSAGE "Welcome to ENSEA Tiny Shell.\nTo quit, tap 'exit'.\n"
+#define BEG "enseash % "
+#define BYE "Bye bye...\n"
+#define BYEBYE "\nBye bye...\n"
+
+//To display return code / signal and execution time of previous code
+#define S_EXIT "[exit:"
+#define S_SIGN "[sign:"
+#define S_END "] % "
 
 void execute(char *command);
-void getcode(char *charcode, char *statuschar, char *prompt, int statuscode, char *end);
-void display_return(pid_t pid, int status, char *s_exit, char *s_sign, char *prompt, char *status_exit, char *status_sign, char *s_end);
+void getcode(char *charcode, int statuscode);
+void display_return(pid_t pid);
 
 
 int main (int argc, char **argv) {
 
-	// Welcome Message
-	char message[] = "Welcome to ENSEA Tiny Shell.\nTo quit, tap 'exit'.\n";
-	char beg[BUFF_SIZE] = "enseash % ";
-	char bye[BUFF_SIZE] = "Bye bye...\n";
-	char bye2[BUFF_SIZE] = "\nBye bye...\n";
-
-	write(STDOUT_FILENO, message, strlen(message));
-	write(STDOUT_FILENO, beg, strlen(beg));
+	write(STDOUT_FILENO, MESSAGE, strlen(MESSAGE));
+	write(STDOUT_FILENO, BEG, strlen(BEG));
 
 	// Fundamentals
-
 	ssize_t ret;
-	pid_t pid;
-	int status;
 
 	char buffer[BUFF_SIZE];
 	char command[BUFF_SIZE];
-
-	// To display return code / signal
-
-	char prompt[BUFF_SIZE] = "";
-	char s_exit[BUFF_SIZE] = "[exit:";
-	char s_sign[BUFF_SIZE] = "[sign:";
-	char s_end[BUFF_SIZE] = "] % ";
-	
-	char status_sign[BUFF_SIZE];
-	char status_exit[BUFF_SIZE];
-
 	
 	while ((ret = read(STDIN_FILENO, buffer, BUFF_SIZE)) > 0) {	// ret bytes > 0 have been read...
 
 		// Get the command without '\n'
 		strncpy(command, buffer, ret);
-    	command[ret-1] = '\0';
+    		command[ret-1] = '\0';
 
 		// Exit with the command exit 
 		if ((strncmp(command, "exit", strlen("exit"))==0)) {
-			write(STDOUT_FILENO, bye, strlen(bye));
+			write(STDOUT_FILENO, BYE, strlen(BYE));
 			exit(EXIT_SUCCESS);
 		}
 
+		pid_t pid;		
+		
 		if ((pid=fork())==-1) {	// if an error occurs
 			write (STDOUT_FILENO, "exit", strlen("exit"));
 			perror("Fork impossible");
@@ -65,12 +56,12 @@ int main (int argc, char **argv) {
 		} else if (pid == 0) {	// child code
 			execute(command);
 		} else {	// father code 
-			display_return(pid, status, s_exit, s_sign, prompt, status_exit, status_sign, s_end);
+			display_return(pid);
 		}
 	}
 	// Exit with <ctrl>+D (ret = 0)
 	if (ret == 0) {
-		write(STDOUT_FILENO, bye2, strlen(bye2));
+		write(STDOUT_FILENO, BYEBYE, strlen(BYEBYE));
 		exit(EXIT_SUCCESS);
 	}
 	return 0;
@@ -84,23 +75,32 @@ void execute(char *command) {
 	}
 }
 
-void getcode(char *charcode, char *statuschar, char *prompt, int statuscode, char *end) {
+void getcode(char *charcode, int statuscode) {
+
+	char prompt[BUFF_SIZE] = "";
+	
+	strcat(prompt,"enseash ");
 	strcat(prompt, charcode);
+	
+	char statuschar[BUFF_SIZE];
+	
 	sprintf(statuschar, "%d", statuscode);
 	strcat(prompt, statuschar);
-	strcat(prompt, end); 
-}
-
-void display_return(pid_t pid, int status, char *s_exit, char *s_sign, char *prompt, char *status_exit, char *status_sign, char *s_end){
-	waitpid(pid, &status, WCONTINUED);
-	strcat(prompt,"enseash ");
-		
-	if (WIFEXITED(status)) {
-		getcode (s_exit, status_exit, prompt, WEXITSTATUS(status), s_end);
-	} else if (WIFEXITED(status)) {
-		getcode (s_sign, status_sign, prompt, WTERMSIG(status), s_end);
-	}
 	
+	strcat(prompt, S_END); 
+
 	write(STDOUT_FILENO, prompt, strlen(prompt));
 	prompt[0] ='\0';
+}
+
+void display_return(pid_t pid){
+
+	int status;
+	waitpid(pid, &status, WCONTINUED);
+		
+	if (WIFEXITED(status)) {
+		getcode (S_EXIT, WEXITSTATUS(status));
+	} else if (WIFSIGNALED(status)) {
+		getcode (S_SIGN, WTERMSIG(status));
+	}
 }
