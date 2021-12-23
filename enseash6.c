@@ -1,4 +1,4 @@
-// Added: Display the execution time of the previous code
+// Added: Added execution of complex commands
 // Improved: Organization with several functions
 
 #include <stdio.h>
