@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 // Added: Added Management of Redirections
-=======
-// Added: Added Management of Redirections (ONLY STDOUT)
->>>>>>> 8176c8047f405ed067a43ec46af9f83887f1f69d
 
 #include <stdio.h>
 #include <string.h>
