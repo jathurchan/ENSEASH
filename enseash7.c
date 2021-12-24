@@ -1,5 +1,4 @@
-// Added: Added execution of complex commands
-// Improved: Organization with several functions
+// Added: Added Management of Redirections (ONLY STDOUT)
 
 #include <stdio.h>
 #include <string.h>
@@ -45,9 +44,8 @@ int main (int argc, char **argv) {
 	while ((ret = read(STDIN_FILENO, buffer, BUFF_SIZE)) > 0) {	// ret bytes > 0 have been read...
 
 		// Get the command without '\n'
-		
 		strncpy(command, buffer, ret);
-    		command[ret-1] = '\0';
+		command[ret-1] = '\0';
 		
 		// Exit with the command exit 
 		if ((strncmp(command, EXIT, strlen(EXIT))==0)) {
@@ -61,9 +59,11 @@ int main (int argc, char **argv) {
 		
 		if (token1[1] != NULL) {
 			if((fd1 = open(token1[1], O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) < 0) {
-		            perror("Can't open file");
-		            exit(EXIT_FAILURE);                    
-		        }
+				perror("Can't open file");
+				exit(EXIT_FAILURE);   
+			}                 
+			
+			dup2(fd1, STDOUT_FILENO);
 		}
 		
 		pid_t pid;
@@ -74,14 +74,13 @@ int main (int argc, char **argv) {
 
 		} else if (pid == 0) {	// child code			
 			execute(token1[0]);
+			dup2(1, STDOUT_FILENO);
 			
-		} else {	// father code 
+		} else {	// father code		
 
 			display_return(pid);			
 			
-			if (token1[1] != NULL) {
-		        	close(fd1);
-			}
+			
 		}
 	}
 	
