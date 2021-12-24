@@ -99,14 +99,14 @@ char** splitstr(char* command, const char separator) {
 	char* temp = command;
 	char* last = 0;
 
-	while (*temp) {		//counts the number of elements to be split
+	while (*temp) {		//Counts the number of elements to be split
 		if (separator == *temp) {
 		count++;
 		last = temp;
 		}
 	temp++;
 	}
-
+	
 	count += last < (command + strlen(command) - 1);
 	count += 2;
     
@@ -116,16 +116,16 @@ char** splitstr(char* command, const char separator) {
 	char delim[2] = {separator, 0};
 	
 	if (splitted) {
-	size_t index  = 0;
-	char* token = strtok(command, delim);
+		size_t index  = 0;
+		char* token = strtok(command, delim);
 
-	while (token) {
-		*(splitted + index++) = strdup(token);
-		token = strtok(NULL, delim);
-	}
-	
-	*(splitted + index++) = (char *) NULL;
-	*(splitted + index) = 0;
+		while (token) {
+			*(splitted + index++) = strdup(token);
+			token = strtok(NULL, delim);
+		}
+		
+		*(splitted + index++) = (char *) NULL;
+		*(splitted + index) = 0;
 	
 	}
 	return splitted;
