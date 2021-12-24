@@ -29,6 +29,7 @@ void display_prompt(char *charcode, int statuscode, double exec_time);
 void display_return(pid_t pid);
 double get_time(struct timespec *start, struct timespec *end);
 char** splitstr(char* a_str, const char a_delim);	
+void freetokens(char ** tokens);
 
 int main (int argc, char **argv) {
 
@@ -61,14 +62,11 @@ int main (int argc, char **argv) {
 		if (token1[1] != NULL) {
 			if((fd1 = open(token1[1], O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) < 0) {
 				perror("Can't open file");
-				exit(EXIT_FAILURE);
 			}                 
 		} else if (token2[1] != NULL) {
 			if((fd2 = open(token2[1], O_RDONLY)) < 0) {
 				perror("Can't open file");
-				exit(EXIT_FAILURE);
 			} 
-			strcpy(token1[0], token2[0]);                
 		}                 
 	
 		pid_t pid;
@@ -78,13 +76,24 @@ int main (int argc, char **argv) {
 			perror("Fork impossible");
 
 		} else if (pid == 0) {	// child code
-			dup2(fd1, STDOUT_FILENO);
-			dup2(fd2, STDIN_FILENO);			
-			execute(token1[0]);
+			if (token1[1] != NULL) {
+				dup2(fd1, STDOUT_FILENO);
+				execute(token1[0]);
+			} else if (token2[1] != NULL) {
+				dup2(fd2, STDIN_FILENO);
+				execute(token2[0]);
+			} else {
+				execute(command);
+			}
 
 		} else {	// father code	
-			close(fd1); 			
-			close(fd2);
+			if (token1[1] != NULL) {
+				close(fd1); 			
+			} else if (token2[1] != NULL) {
+				close(fd2);
+			}
+			freetokens(token1);
+			freetokens(token2);
 			display_return(pid);	
 		}
 	}
@@ -107,13 +116,7 @@ void execute(char *command) {
 		exit(EXIT_FAILURE);
 	}
 
-	if (tokens) {
-	        int i;
-	        for (i = 0; *(tokens + i); i++) {
-	            free(*(tokens + i));
-	        }
-	        free(tokens);
-	}
+	freetokens(tokens);
 }
 
 char** splitstr(char* command, const char separator) {
@@ -195,4 +198,14 @@ void display_return(pid_t pid){
 
 double get_time(struct timespec *start, struct timespec *end) {
     	return floor((end->tv_sec - start->tv_sec) * 1e3 + (end->tv_nsec - start->tv_nsec)* 1e-6);  	
+}
+
+void freetokens(char ** tokens) {
+	if (tokens) {
+	        int i;
+	        for (i = 0; *(tokens + i); i++) {
+	            free(*(tokens + i));
+	        }
+	        free(tokens);
+	}
 }
