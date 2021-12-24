@@ -87,49 +87,48 @@ void execute(char *command) {
 
 	if (tokens) {
 	        int i;
-	        for (i = 0; *(tokens + i); i++)
-	        {
+	        for (i = 0; *(tokens + i); i++) {
 	            free(*(tokens + i));
 	        }
-
 	        free(tokens);
 	}
-	
 }
 
 char** splitstr(char* command, const char separator) {
-    char** splitted = 0;
-    size_t count = 0;
-    char* temp = command;
-    char* last = 0;
-    char delim[2] = {separator, 0};
+	size_t count = 0;
+	char* temp = command;
+	char* last = 0;
 
-    while (*temp) {		//counts the number of elements to be split
-        if (separator == *temp) {
-            count++;
-            last = temp;
-        }
-        temp++;
-    }
+	while (*temp) {		//counts the number of elements to be split
+		if (separator == *temp) {
+		count++;
+		last = temp;
+		}
+	temp++;
+	}
+
+	count += last < (command + strlen(command) - 1);
+	count += 2;
     
-    count += last < (command + strlen(command) - 1);
-    count += 2;
-    
-    splitted = malloc(sizeof(char*) * count);
+	char** splitted = 0;
+	splitted = malloc(sizeof(char*) * count);
 
-    if (splitted) {
-        size_t index  = 0;
-        char* token = strtok(command, delim);
+	char delim[2] = {separator, 0};
+	
+	if (splitted) {
+	size_t index  = 0;
+	char* token = strtok(command, delim);
 
-        while (token) {
-            *(splitted + index++) = strdup(token);
-            token = strtok(NULL, delim);
-        }
-        
-        *(splitted + index++) = (char *) NULL;
-        *(splitted + index) = 0;
-    }
-    return splitted;
+	while (token) {
+		*(splitted + index++) = strdup(token);
+		token = strtok(NULL, delim);
+	}
+	
+	*(splitted + index++) = (char *) NULL;
+	*(splitted + index) = 0;
+	
+	}
+	return splitted;
 }
 
 void display_prompt(char *charcode, int statuscode, double exec_time) {
