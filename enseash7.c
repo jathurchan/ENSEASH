@@ -30,6 +30,7 @@ void display_return(pid_t pid);
 double get_time(struct timespec *start, struct timespec *end);
 char** splitstr(char* a_str, const char a_delim);	
 void freetokens(char ** tokens);
+void ltrim(char *string);
 
 int main (int argc, char **argv) {
 
@@ -60,10 +61,12 @@ int main (int argc, char **argv) {
 		int fd1, fd2;
 		
 		if (token1[1] != NULL) {
+			ltrim(token1[1]);
 			if((fd1 = open(token1[1], O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) < 0) {
 				perror("Can't open file");
 			}                 
 		} else if (token2[1] != NULL) {
+			ltrim(token2[1]);
 			if((fd2 = open(token2[1], O_RDONLY)) < 0) {
 				perror("Can't open file");
 			} 
@@ -207,5 +210,21 @@ void freetokens(char ** tokens) {
 	            free(*(tokens + i));
 	        }
 	        free(tokens);
+	}
+}
+
+//Delete spaces at the left of a char
+void ltrim(char *string) {
+	int stringlen = (strlen(string) - 1);
+	if (stringlen > 0) {
+		int i = 0;
+		while (string[i] == ' ')
+			i++;
+		if (i > 0) {
+			int j = 0;
+			for (j = 0; j <= (stringlen - i); j++)
+			string[j] = string[(i + j)];
+			string[j] = 0;
+		}
 	}
 }
