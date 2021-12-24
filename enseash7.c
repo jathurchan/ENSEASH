@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // Added: Added Management of Redirections
+=======
+// Added: Added Management of Redirections (ONLY STDOUT)
+>>>>>>> 8176c8047f405ed067a43ec46af9f83887f1f69d
 
 #include <stdio.h>
 #include <string.h>
@@ -61,12 +65,19 @@ int main (int argc, char **argv) {
 		if (token1[1] != NULL) {
 			if((fd1 = open(token1[1], O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) < 0) {
 				perror("Can't open file");
+<<<<<<< HEAD
 			}                 
 		} else if (token2[1] != NULL) {
 			if((fd2 = open(token2[1], O_RDONLY)) < 0) {
 				perror("Can't open file");
 			} 
 			strcpy(token1[0], token2[0]);                
+=======
+				exit(EXIT_FAILURE);   
+			}                 
+			
+			dup2(fd1, STDOUT_FILENO);
+>>>>>>> 8176c8047f405ed067a43ec46af9f83887f1f69d
 		}
 		
 		
@@ -80,11 +91,21 @@ int main (int argc, char **argv) {
 			dup2(fd1, STDOUT_FILENO);
 			dup2(fd2, STDIN_FILENO);			
 			execute(token1[0]);
+<<<<<<< HEAD
 
 		} else {	// father code		
 			close(fd1); 
 			close(fd2);
 			display_return(pid);	
+=======
+			dup2(1, STDOUT_FILENO);
+			
+		} else {	// father code		
+
+			display_return(pid);			
+			
+			
+>>>>>>> 8176c8047f405ed067a43ec46af9f83887f1f69d
 		}
 	}
 	

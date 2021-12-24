@@ -123,10 +123,7 @@ char** splitstr(char* command, const char separator) {
 			*(splitted + index++) = strdup(token);
 			token = strtok(NULL, delim);
 		}
-		
-		*(splitted + index++) = (char *) NULL;
 		*(splitted + index) = 0;
-	
 	}
 	return splitted;
 }
