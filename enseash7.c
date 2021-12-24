@@ -1,5 +1,4 @@
-// Added: Added execution of complex commands
-// Improved: Organization with several functions
+// Added: Added Management of Redirections
 
 #include <stdio.h>
 #include <string.h>
@@ -45,9 +44,8 @@ int main (int argc, char **argv) {
 	while ((ret = read(STDIN_FILENO, buffer, BUFF_SIZE)) > 0) {	// ret bytes > 0 have been read...
 
 		// Get the command without '\n'
-		
 		strncpy(command, buffer, ret);
-    		command[ret-1] = '\0';
+		command[ret-1] = '\0';
 		
 		// Exit with the command exit 
 		if ((strncmp(command, EXIT, strlen(EXIT))==0)) {
@@ -56,15 +54,21 @@ int main (int argc, char **argv) {
 		}
 		
 		char** token1 = splitstr(command, '>');
+		char** token2 = splitstr(command, '<');
 		
 		int fd1, fd2;
 		
 		if (token1[1] != NULL) {
 			if((fd1 = open(token1[1], O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) < 0) {
-		            perror("Can't open file");
-		            exit(EXIT_FAILURE);                    
-		        }
+				perror("Can't open file");
+			}                 
+		} else if (token2[1] != NULL) {
+			if((fd2 = open(token2[1], O_RDONLY)) < 0) {
+				perror("Can't open file");
+			} 
+			strcpy(token1[0], token2[0]);                
 		}
+		
 		
 		pid_t pid;
 
@@ -72,16 +76,15 @@ int main (int argc, char **argv) {
 			write(STDOUT_FILENO, EXIT, strlen(EXIT));
 			perror("Fork impossible");
 
-		} else if (pid == 0) {	// child code			
+		} else if (pid == 0) {	// child code
+			dup2(fd1, STDOUT_FILENO);
+			dup2(fd2, STDIN_FILENO);			
 			execute(token1[0]);
-			
-		} else {	// father code 
 
-			display_return(pid);			
-			
-			if (token1[1] != NULL) {
-		        	close(fd1);
-			}
+		} else {	// father code		
+			close(fd1); 
+			close(fd2);
+			display_return(pid);	
 		}
 	}
 	
